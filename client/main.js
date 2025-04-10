@@ -3,8 +3,8 @@ import BuildingLayer from './Modals/BuildingLayer.js';
 import Event from './Modals/Event.js';
 import EventLayer from './Modals/EventLayer.js'
 import Twingraph from './Modals/traffic/Twingraph.js';
-
-import Htmlcode from './htmlcode.js'
+import ClockManager from'./Utilities/ClockManager.js';
+import HtmlManager from './Utilities/HtmlManager.js'
 
 
 window.onload = setup;
@@ -13,7 +13,7 @@ var measure;
 var viewer;
 const buildingLayer = new BuildingLayer();
 const eventlayer = new  EventLayer();
-const htmlcode  = new Htmlcode();
+
 
 function setup() {
     const west = 5.798212900532118;
@@ -130,18 +130,17 @@ function setup() {
         },
     });
     
-    let triggered = false;
-    clock(triggered);
-    clockByDate();
     setupClickHandler();
-
-   htmlcode.createButtons([
+    const htmlmanager  = new HtmlManager();
+    htmlmanager.createButtons([
     { label: 'Close Buildings', action: () => buildingLayer.closeBuildings()},
     { label: 'Open Buildings', action: () => buildingLayer.openBuildings() },
-    { label: 'Add Building', action: () => htmlcode.createBuildingForm(addBuilding) },
-    {label:'Add Event', action: () => htmlcode.createEventForm(addEvent)}
+    { label: 'Add Building', action: () => htmlmanager.createBuildingForm(addBuilding) },
+    {label:'Add Event', action: () => htmlmanager.createEventForm(addEvent)}
     ]);
 
+    const clockManager = new ClockManager(viewer, buildingLayer, eventlayer);
+    clockManager.init(createEvent);
 }
 
 //latitude = x
@@ -252,55 +251,6 @@ function removeButtons() {
     if (existingContainer) {
         existingContainer.remove();
     }
-}
-
-let triggered = false; // Declare a global triggered variable
-function clock() {
-    viewer.clock.onTick.addEventListener(() => {
-        const currentTime = viewer.clock.currentTime;
-        const date = Cesium.JulianDate.toDate(currentTime);
-
-        // Get hours in UTC
-        const hours = date.getUTCHours();
-
-        if ((hours === 8 || hours === 18) && !triggered) {
-            if (hours === 8) {
-                buildingLayer.openBuildings(); 
-            } else if (hours === 18) {
-                buildingLayer.closeBuildings(); 
-            }
-            triggered = true; 
-        }
-        
-        if (hours !== 8 && hours !== 18) {
-            triggered = false;
-        }
-    });
-}
-
-function clockByDate() {
-    viewer.clock.onTick.addEventListener(() => {
-        const currentTime = viewer.clock.currentTime;
-        const date = Cesium.JulianDate.toDate(currentTime).toISOString().split('T')[0];
-
-        //Loopt door elke event om te kijken als de date matched met de eventdate
-        eventlayer.events.forEach(event => {
-            // start de event als de date matched
-            if (date === event.begindate && !event.triggered) {
-                eventlayer.getEvents(createEvent);
-                event.triggered = true;  
-                console.log("Event has started");
-            }
-            // eindigt event als de date matched met de eind date
-            if (date === event.endDate && event.triggered) {
-                viewer.entities.remove(event.entity); // Remove the event entity
-                event.entity = null; // Clear the reference
-                event.triggered = false; // Reset the triggered flag
-                console.log("Event has endend");
-
-            }
-        });
-    });
 }
 
 //haalt de buildings gegevens op en slaat ze op in een json bestand

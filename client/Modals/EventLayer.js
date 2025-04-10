@@ -8,9 +8,12 @@ class EventLayer{
         console.log("Event added:", event.getInfo());
     }
 
-    getEvents(createBoxFunction) {
+    getEvents(createBoxFunction, filterCondition = null) {
         this.events.forEach(event => {
-            event.displayEvent(createBoxFunction);
+            // If a filter condition is provided, only display matching events
+            if (!filterCondition || filterCondition(event)) {
+                event.displayEvent(createBoxFunction);
+            }
         });
     }
 }

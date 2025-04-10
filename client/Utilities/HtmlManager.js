@@ -1,4 +1,4 @@
-class htmlcode{
+class HtmlManager{
     createBuildingForm(saveBuilding) {
         // Create the form container
         const formContainer = document.createElement('div');
@@ -253,4 +253,4 @@ class htmlcode{
     
     
 }
-export default htmlcode;
+export default HtmlManager;

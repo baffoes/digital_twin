@@ -21,7 +21,7 @@ class Event{
 
 
     displayEvent(createBoxFunction){
-        this.entity = createBoxFunction(1000,200,100,65,30,0,Cesium.Color.ORANGE, this.getInfo(),this.id)
+        this.entity = createBoxFunction(1525,310,65,65,30,0,Cesium.Color.ORANGE, this.getInfo(),this.id)
     }    
 
     
